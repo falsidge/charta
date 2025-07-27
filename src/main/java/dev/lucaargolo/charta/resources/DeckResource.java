@@ -38,7 +38,6 @@ public class DeckResource implements ResourceManagerReloadListener {
                 try(InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
                     JsonElement json = JsonParser.parseReader(reader);
                     DataResult<Deck> cardDeck = Deck.CODEC.parse(JsonOps.INSTANCE, json);
-                    // TODO Decode
                     decks.put(location, cardDeck.getOrThrow(false, (e)->{throw new RuntimeException(e);}));
                 }
             }catch (IOException e) {

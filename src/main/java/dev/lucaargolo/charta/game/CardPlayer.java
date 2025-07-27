@@ -1,6 +1,7 @@
 package dev.lucaargolo.charta.game;
 
 import dev.lucaargolo.charta.utils.CardPlayerHead;
+import dev.lucaargolo.charta.utils.PortUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
@@ -37,7 +38,7 @@ public interface CardPlayer {
 
     default Component getColoredName() {
 //        return getName().copy().withColor(getColor().getTextureDiffuseColor());
-        return getName().copy(); //TODO color
+        return getName().copy().withStyle((s)->s.withColor(PortUtils.fromArrayColors(getColor().getTextureDiffuseColors())));
     }
 
     DyeColor getColor();

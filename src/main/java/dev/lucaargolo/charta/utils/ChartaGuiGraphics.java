@@ -37,7 +37,7 @@ public class ChartaGuiGraphics {
 //        ChartaGuiGraphics.blitWhiteImage(parent, textureLocation, x, y, u, v, width, height, textureWidth, textureHeight);
 //        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 //        ChartaGuiGraphics.blitWhiteImageGlow(parent, glowLocation, x, y, u, v, width, height, textureWidth, textureHeight);
-        // TODO
+        // TODO glow
         Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
     }
 

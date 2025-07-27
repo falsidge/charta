@@ -34,7 +34,7 @@ public class MultiLineTooltip extends Tooltip {
 
             this.cachedTooltip = lines;
 //            this.splitWithLanguage = language;
-            // TODO wth
+            // TODO splitwithlanguage
         }
 
         return this.cachedTooltip;

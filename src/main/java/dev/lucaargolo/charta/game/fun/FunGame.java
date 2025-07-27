@@ -253,17 +253,14 @@ public class FunGame extends CardGame<FunGame> {
 
                 if(isChoosingWild) {
                     //Player was choosing the suit from a wild card.
-                    play(currentPlayer, Component.translatable("message.charta.chose_a_suit", Component.translatable(deck.getSuitTranslatableKey(currentSuit))));
-                    // TODO with Color .withColor(deck.getSuitColor(currentSuit))
+                    play(currentPlayer, Component.translatable("message.charta.chose_a_suit", Component.translatable(deck.getSuitTranslatableKey(currentSuit)).withStyle((s)->s.withColor(deck.getSuitColor(currentSuit)))));
                     //If the player was not a bot, there will be an extra card in the play pile, so we need to remove it.
                     if(!currentPlayer.shouldCompute()) {
                         playPile.removeLast();
                     }
                     isChoosingWild = false;
                 }else{
-                    play(currentPlayer, Component.translatable("message.charta.played_a_card", Component.translatable(deck.getCardTranslatableKey(card))));
-                    // TODO with Color .withColor(deck.getCardColor(card))
-
+                    play(currentPlayer, Component.translatable("message.charta.played_a_card", Component.translatable(deck.getCardTranslatableKey(card)).withStyle((s)->s.withColor(deck.getCardColor(card)))));
                 }
 
                 //If the player is a bot, we need to manually remove the card from its hand and censored hand, and add it to the play pile.

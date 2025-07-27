@@ -38,7 +38,7 @@ public class CustomOptionTooltip extends Tooltip {
         } else {
             Language language = Language.getInstance();
             if (this.cachedTooltip == null) {
-                // TODO language
+                // TODO splitwithlanguage
                 List<FormattedCharSequence> tooltip = new ArrayList<>(splitTooltip(minecraft, this.message));
                 tooltip.add(Component.empty().getVisualOrderText());
                 tooltip.add(Component.translatable("message.charta.original", Component.literal(original).withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.RED).getVisualOrderText());

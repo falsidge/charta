@@ -419,8 +419,7 @@ public class SolitaireGame extends CardGame<SolitaireGame> {
                 Card card = slot.getLast();
                 if (foundationPiles.get(card.suit()).canInsertCard(currentPlayer, List.of(card), -1)) {
                     return Pair.of(
-                        Component.translatable("message.charta.move_card_from_tableau_to_foundation", Component.translatable(deck.getCardTranslatableKey(card))),
-                        // TODO .withColor(deck.getCardColor(card))
+                        Component.translatable("message.charta.move_card_from_tableau_to_foundation", Component.translatable(deck.getCardTranslatableKey(card)).withStyle((s)->s.withColor(deck.getCardColor(card)))),
                         List.of(slot, foundationPiles.get(card.suit()))
                     );
                 }
@@ -432,8 +431,7 @@ public class SolitaireGame extends CardGame<SolitaireGame> {
             Card card = wastePile.getLast();
             if (foundationPiles.get(card.suit()).canInsertCard(currentPlayer, List.of(card), -1)) {
                 return Pair.of(
-                    Component.translatable("message.charta.move_card_from_waste_to_foundation", Component.translatable(deck.getCardTranslatableKey(card))),
-                    // TODO .withColor(deck.getCardColor(card))
+                    Component.translatable("message.charta.move_card_from_waste_to_foundation", Component.translatable(deck.getCardTranslatableKey(card)).withStyle((s)->s.withColor(deck.getCardColor(card)))),
                     List.of(wastePile, foundationPiles.get(card.suit()))
                 );
             }
@@ -449,8 +447,7 @@ public class SolitaireGame extends CardGame<SolitaireGame> {
                     if (fromSlot == toSlot) continue;
                     if (toSlot.canInsertCard(currentPlayer, List.of(card), -1)) {
                         return Pair.of(
-                            Component.translatable("message.charta.move_card_from_tableau_to_tableau", Component.translatable(deck.getCardTranslatableKey(card))),
-                            // todo .withColor(deck.getCardColor(card))
+                            Component.translatable("message.charta.move_card_from_tableau_to_tableau", Component.translatable(deck.getCardTranslatableKey(card)).withStyle((s)->s.withColor(deck.getCardColor(card)))),
                             List.of(fromSlot, toSlot)
                         );
                     }
@@ -464,8 +461,7 @@ public class SolitaireGame extends CardGame<SolitaireGame> {
             for (GameSlot slot : tableauPiles) {
                 if (slot.canInsertCard(currentPlayer, List.of(card), -1)) {
                     return Pair.of(
-                        Component.translatable("message.charta.move_card_from_waste_to_tableau", Component.translatable(deck.getCardTranslatableKey(card))),
-                        // TODO .withColor(deck.getCardColor(card))
+                        Component.translatable("message.charta.move_card_from_waste_to_tableau", Component.translatable(deck.getCardTranslatableKey(card)).withStyle((s)->s.withColor(deck.getCardColor(card)))),
                         List.of(wastePile, slot)
                     );
                 }

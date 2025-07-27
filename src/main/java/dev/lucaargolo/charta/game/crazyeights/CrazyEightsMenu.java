@@ -44,7 +44,6 @@ public class CrazyEightsMenu extends AbstractCardMenu<CrazyEightsGame> {
 
     public CrazyEightsMenu(int containerId, Inventory inventory, FriendlyByteBuf buf) {
         this(containerId, inventory, ContainerLevelAccess.create(inventory.player.level(), buf.readBlockPos()), Deck.CODEC.parse(NbtOps.INSTANCE, buf.readNbt()).getOrThrow(false, (s)->new RuntimeException(s)), buf.readVarIntArray(), buf.readByteArray());
-        // TODO deck decode
     }
 
     public CrazyEightsMenu(int containerId, Inventory inventory, ContainerLevelAccess access, Deck deck, int[] players, byte[] options) {
