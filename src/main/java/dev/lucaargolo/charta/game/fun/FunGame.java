@@ -1,5 +1,6 @@
 package dev.lucaargolo.charta.game.fun;
 
+import dev.lucaargolo.charta.Charta;
 import dev.lucaargolo.charta.blockentity.CardTableBlockEntity;
 import dev.lucaargolo.charta.game.*;
 import dev.lucaargolo.charta.item.DeckItem;
@@ -16,7 +17,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -246,20 +247,23 @@ public class FunGame extends CardGame<FunGame> {
                 }
             }else if(!currentPlayer.shouldCompute() || canPlay(currentPlayer, play)) {
                 //Player played a card (Since we already checked in the menu, we don't need to check again if the player is pre computed).]
-                Card card = play.cards().getLast();
+                Card card = play.cards().get(play.cards().size()-1);
                 currentPlayer.playSound(ModSounds.CARD_PLAY.get());
                 currentSuit = card.suit();
 
                 if(isChoosingWild) {
                     //Player was choosing the suit from a wild card.
-                    play(currentPlayer, Component.translatable("message.charta.chose_a_suit", Component.translatable(deck.getSuitTranslatableKey(currentSuit)).withColor(deck.getSuitColor(currentSuit))));
+                    play(currentPlayer, Component.translatable("message.charta.chose_a_suit", Component.translatable(deck.getSuitTranslatableKey(currentSuit))));
+                    // TODO with Color .withColor(deck.getSuitColor(currentSuit))
                     //If the player was not a bot, there will be an extra card in the play pile, so we need to remove it.
                     if(!currentPlayer.shouldCompute()) {
                         playPile.removeLast();
                     }
                     isChoosingWild = false;
                 }else{
-                    play(currentPlayer, Component.translatable("message.charta.played_a_card", Component.translatable(deck.getCardTranslatableKey(card)).withColor(deck.getCardColor(card))));
+                    play(currentPlayer, Component.translatable("message.charta.played_a_card", Component.translatable(deck.getCardTranslatableKey(card))));
+                    // TODO with Color .withColor(deck.getCardColor(card))
+
                 }
 
                 //If the player is a bot, we need to manually remove the card from its hand and censored hand, and add it to the play pile.
@@ -377,7 +381,7 @@ public class FunGame extends CardGame<FunGame> {
         if(cards.size() != 1) {
             return false;
         }
-        Card card = cards.getLast();
+        Card card = cards.get(cards.size()-1);
         Card lastCard = playPile.getLast();
 
         if(!isGameReady || lastCard == null) {
@@ -440,7 +444,7 @@ public class FunGame extends CardGame<FunGame> {
                         players.forEach(p -> {
                             LivingEntity entity = p.getEntity();
                             if(entity instanceof ServerPlayer serverPlayer) {
-                                PacketDistributor.sendToPlayer(serverPlayer, new LastFunPayload(DeckItem.getDeck(deck)));
+                                Charta.INSTANCE.send(PacketDistributor.PLAYER.with(()->serverPlayer), new LastFunPayload(DeckItem.getDeck(deck)));
                             }
                         });
                         table(Component.translatable("message.charta.player_automatically_drew_cards", player.getColoredName(), drawAmount));
@@ -480,7 +484,7 @@ public class FunGame extends CardGame<FunGame> {
     private CardPlayer getNextPlayer() {
         if(currentPlayer == null) {
             //If current player is null, just get the first one.
-            return getPlayers().getFirst();
+            return getPlayers().get(0);
         }else{
             //If current player is not null, we need to check who is the next player based on the order of the game.
             int indexOf = getPlayers().indexOf(currentPlayer);
@@ -491,7 +495,7 @@ public class FunGame extends CardGame<FunGame> {
                     return getPlayers().get(indexOf - 1);
                 }else{
                     //If index - 1 is negative, we get the last player in the list.
-                    return getPlayers().getLast();
+                    return getPlayers().get(getPlayers().size()-1);
                 }
             }else{
                 //If the game is not reversed. We just get the next index.

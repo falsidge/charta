@@ -1,13 +1,11 @@
 package dev.lucaargolo.charta.client.gui.components;
 
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import dev.lucaargolo.charta.client.ChartaClient;
 import dev.lucaargolo.charta.utils.CardImage;
 import dev.lucaargolo.charta.utils.ChartaGuiGraphics;
 import dev.lucaargolo.charta.utils.HoverableRenderable;
 import dev.lucaargolo.charta.utils.TickableWidget;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
@@ -46,7 +44,9 @@ public abstract class AbstractCardWidget extends AbstractPreciseWidget implement
     @Override
     protected void renderWidget(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         if(isHovered && this.getCardTranslatableKey() != null) {
-            scheduleTooltip(Component.translatable(this.getCardTranslatableKey()).withColor(this.getCardColor()));
+//            scheduleTooltip(Component.translatable(this.getCardTranslatableKey()).withStyle(Style.create(Optional.of(TextColor.fromRgb(this.getCardColor())))));
+            scheduleTooltip(Component.translatable(this.getCardTranslatableKey()));
+            // TODO color
         }
 
         float inset = Mth.lerp(partialTick, this.lastInset, this.inset);
@@ -62,13 +62,13 @@ public abstract class AbstractCardWidget extends AbstractPreciseWidget implement
         float xOffset = (this.getPreciseWidth()*1.333333f - this.getPreciseWidth())/2f;
         float yOffset = (this.getPreciseHeight()*1.333333f - this.getPreciseHeight())/2f;
         ChartaGuiGraphics.blitCard(guiGraphics, this.getCardTexture(cardId, false), this.getPreciseX()-xOffset, this.getPreciseY()-yOffset, this.getPreciseWidth()+(xOffset*2f), this.getPreciseHeight()+(yOffset*2f));
-        ChartaClient.getGlowRenderTarget().bindWrite(false);
-        RenderSystem.setShaderColor(0f, 0f, 0f, 1f);
-        ChartaGuiGraphics.blitCard(guiGraphics, this.getCardTexture(cardId, false), this.getPreciseX()-xOffset, this.getPreciseY()-yOffset, this.getPreciseWidth()+(xOffset*2f), this.getPreciseHeight()+(yOffset*2f));
-        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-        ChartaGuiGraphics.blitCardGlow(guiGraphics, this.getCardTexture(cardId, true), this.getPreciseX()-xOffset, this.getPreciseY()-yOffset, this.getPreciseWidth()+(xOffset*2f), this.getPreciseHeight()+(yOffset*2f));
-        Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
-
+//        ChartaClient.getGlowRenderTarget().bindWrite(false);
+//        RenderSystem.setShaderColor(0f, 0f, 0f, 1f);
+//        ChartaGuiGraphics.blitCard(guiGraphics, this.getCardTexture(cardId, false), this.getPreciseX()-xOffset, this.getPreciseY()-yOffset, this.getPreciseWidth()+(xOffset*2f), this.getPreciseHeight()+(yOffset*2f));
+//        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+//        ChartaGuiGraphics.blitCardGlow(guiGraphics, this.getCardTexture(cardId, true), this.getPreciseX()-xOffset, this.getPreciseY()-yOffset, this.getPreciseWidth()+(xOffset*2f), this.getPreciseHeight()+(yOffset*2f));
+//        Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
+// TODO blur
         lastInset = inset;
         lastFov = fov;
         lastXRot = xRot;

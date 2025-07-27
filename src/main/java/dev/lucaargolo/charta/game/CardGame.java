@@ -1,9 +1,12 @@
 package dev.lucaargolo.charta.game;
 
+import dev.lucaargolo.charta.Charta;
 import dev.lucaargolo.charta.menu.AbstractCardMenu;
 import dev.lucaargolo.charta.network.CardPlayPayload;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -12,7 +15,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.NetworkHooks;
+import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -217,28 +221,30 @@ public abstract class CardGame<G extends CardGame<G>> {
     }
 
     public void openScreen(ServerPlayer serverPlayer, ServerLevel level, BlockPos pos, Deck deck) {
-        serverPlayer.openMenu(new MenuProvider() {
-            @Override
-            public @NotNull Component getDisplayName() {
-                return Component.empty();
-            }
+        NetworkHooks.openScreen(
+            serverPlayer,new MenuProvider() {
+                @Override
+                public @NotNull Component getDisplayName() {
+                    return Component.empty();
+                }
 
-            @Override
-            public @NotNull AbstractContainerMenu createMenu(int containerId, @NotNull Inventory playerInventory, @NotNull Player player) {
-                return CardGame.this.createMenu(containerId, playerInventory, level, pos, deck);
+                @Override
+                public @NotNull AbstractContainerMenu createMenu(int containerId, @NotNull Inventory playerInventory, @NotNull Player player) {
+                    return CardGame.this.createMenu(containerId, playerInventory, level, pos, deck);
+                }
+            },buf -> {
+                buf.writeBlockPos(pos);
+                buf.writeNbt((CompoundTag) Deck.CODEC.encodeStart(NbtOps.INSTANCE, deck).result().orElse(null));
+                buf.writeVarIntArray(getPlayers().stream().mapToInt(CardPlayer::getId).toArray());
+                buf.writeByteArray(this.getRawOptions());
             }
-        }, buf -> {
-            buf.writeBlockPos(pos);
-            Deck.STREAM_CODEC.encode(buf, deck);
-            buf.writeVarIntArray(getPlayers().stream().mapToInt(CardPlayer::getId).toArray());
-            buf.writeByteArray(this.getRawOptions());
-        });
+        );
     }
 
     public void tick() {
         if(!this.isGameReady) {
             if(!this.scheduledActions.isEmpty()) {
-                this.scheduledActions.removeFirst().run();
+                this.scheduledActions.remove(0).run();
             } else {
                 this.isGameReady = true;
                 runGame();
@@ -273,7 +279,7 @@ public abstract class CardGame<G extends CardGame<G>> {
         for(CardPlayer p : this.getPlayers()) {
             LivingEntity entity = p.getEntity();
             if(entity instanceof ServerPlayer serverPlayer) {
-                PacketDistributor.sendToPlayer(serverPlayer, new CardPlayPayload(player.getName().equals(Component.empty()) ? Component.empty() : player.getColoredName(), this.getPlayerHand(player).size(), play));
+                Charta.INSTANCE.send(PacketDistributor.PLAYER.with(()->serverPlayer), new CardPlayPayload(player.getName().equals(Component.empty()) ? Component.empty() : player.getColoredName(), this.getPlayerHand(player).size(), play));
             }
         }
     }

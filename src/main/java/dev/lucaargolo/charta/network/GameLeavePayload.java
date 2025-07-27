@@ -2,40 +2,39 @@ package dev.lucaargolo.charta.network;
 
 import dev.lucaargolo.charta.Charta;
 import dev.lucaargolo.charta.client.gui.screens.ConfirmScreen;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.PacketFlow;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
-import org.jetbrains.annotations.NotNull;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.NetworkEvent;
 
-public record GameLeavePayload() implements CustomPacketPayload {
+import java.util.function.Supplier;
 
-    public static final Type<GameLeavePayload> TYPE = new Type<>(Charta.id("game_leave"));
+public record GameLeavePayload() {
 
-    public static StreamCodec<ByteBuf, GameLeavePayload> STREAM_CODEC = StreamCodec.unit(new GameLeavePayload());
-
-    public static void handleBoth(GameLeavePayload payload, IPayloadContext context) {
-        if(context.flow() == PacketFlow.SERVERBOUND) {
-            handleServer(payload, context);
+//    public static final Type<GameLeavePayload> TYPE = new Type<>(Charta.id("game_leave"));
+//
+//    public static StreamCodec<ByteBuf, GameLeavePayload> STREAM_CODEC = StreamCodec.unit(new GameLeavePayload());
+//
+    public void handleBoth(Supplier<NetworkEvent.Context> context) {
+        if(context.get().getDirection() == NetworkDirection.PLAY_TO_SERVER) {
+            handleServer(context);
         }else{
-            handleClient(payload, context);
+            handleClient(context);
         }
+        context.get().setPacketHandled(true);
     }
 
-    public static void handleServer(GameLeavePayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            context.player().stopRiding();
+    public void handleServer(Supplier<NetworkEvent.Context> context) {
+        context.get().enqueueWork(() -> {
+            context.get().getSender().stopRiding();
         });
     }
 
-    public static void handleClient(GameLeavePayload payload, IPayloadContext context) {
-        context.enqueueWork(GameLeavePayload::openExitScreen);
+    public static void handleClient(Supplier<NetworkEvent.Context> context) {
+        context.get().enqueueWork(GameLeavePayload::openExitScreen);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -44,14 +43,19 @@ public record GameLeavePayload() implements CustomPacketPayload {
         minecraft.setScreen(new ConfirmScreen(null, Component.translatable("message.charta.leaving_game"), true, () -> {
             if(minecraft.player != null) {
                 minecraft.player.stopRiding();
-                PacketDistributor.sendToServer(new GameLeavePayload());
+                Charta.INSTANCE.sendToServer(new GameLeavePayload());
             }
         }));
     }
 
-    @Override
-    public @NotNull CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
-        return TYPE;
+//    @Override
+//    public @NotNull CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
+//        return TYPE;
+//    }
+    public void toBytes(FriendlyByteBuf buf) {
     }
-
+    public static GameLeavePayload fromBytes(FriendlyByteBuf buf)
+    {
+        return new GameLeavePayload();
+    }
 }

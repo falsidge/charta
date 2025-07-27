@@ -63,7 +63,7 @@ public class SolitaireGame extends CardGame<SolitaireGame> {
             @Override
             public void onRemove(CardPlayer player, List<Card> cards) {
                 super.onRemove(player, cards);
-                lastStockCard = cards.getLast();
+                lastStockCard = cards.get(cards.size()-1);
                 lastStockCard.flip();
             }
 
@@ -77,7 +77,7 @@ public class SolitaireGame extends CardGame<SolitaireGame> {
         this.wastePile = addSlot(new GameSlot(new LinkedList<>(), leftX + CardImage.WIDTH + 5, topY, 0f, 0f) {
             @Override
             public boolean canInsertCard(CardPlayer player, List<Card> cards, int index) {
-                return cards.size() == 1 && cards.getLast() == lastStockCard;
+                return cards.size() == 1 && cards.get(cards.size()-1) == lastStockCard;
             }
 
             @Override
@@ -90,7 +90,7 @@ public class SolitaireGame extends CardGame<SolitaireGame> {
             @Override
             public void onRemove(CardPlayer player, List<Card> cards) {
                 super.onRemove(player, cards);
-                lastStockCard = cards.getLast();
+                lastStockCard = cards.get(cards.size()-1);
             }
 
             @Override
@@ -266,7 +266,7 @@ public class SolitaireGame extends CardGame<SolitaireGame> {
 
         this.scheduledActions.add(() -> Snapshot.create(this));
 
-        this.currentPlayer = players.getFirst();
+        this.currentPlayer = players.get(0);
         this.isGameReady = false;
         this.isGameOver = false;
 
@@ -351,7 +351,7 @@ public class SolitaireGame extends CardGame<SolitaireGame> {
     public void restore() {
         if(!this.snapshots.isEmpty()) {
             this.currentPlayer.playSound(ModSounds.CARD_DRAW.get());
-            Snapshot snapshot = this.snapshots.removeLast();
+            Snapshot snapshot = this.snapshots.remove(this.snapshots.size()-1);
             snapshot.restore(this);
             this.moves++;
             this.currentPlayer.playSound(ModSounds.CARD_PLAY.get());
@@ -363,12 +363,12 @@ public class SolitaireGame extends CardGame<SolitaireGame> {
         if(!taken) {
             Snapshot current = Snapshot.create(this);
             if(!snapshots.isEmpty()) {
-                Snapshot last = snapshots.getLast();
+                Snapshot last = snapshots.get(snapshots.size()-1);
                 if (!current.equals(last)) {
-                    snapshots.addLast(current);
+                    snapshots.add(current);
                 }
             }else{
-                snapshots.addLast(current);
+                snapshots.add(current);
             }
         }
     }
@@ -378,7 +378,7 @@ public class SolitaireGame extends CardGame<SolitaireGame> {
         if(taken) {
             if(!snapshots.isEmpty()) {
                 Snapshot current = Snapshot.create(this);
-                Snapshot last = snapshots.getLast();
+                Snapshot last = snapshots.get(snapshots.size()-1);
                 if(!current.equals(last)) {
                     moves++;
                 }
@@ -419,7 +419,8 @@ public class SolitaireGame extends CardGame<SolitaireGame> {
                 Card card = slot.getLast();
                 if (foundationPiles.get(card.suit()).canInsertCard(currentPlayer, List.of(card), -1)) {
                     return Pair.of(
-                        Component.translatable("message.charta.move_card_from_tableau_to_foundation", Component.translatable(deck.getCardTranslatableKey(card)).withColor(deck.getCardColor(card))),
+                        Component.translatable("message.charta.move_card_from_tableau_to_foundation", Component.translatable(deck.getCardTranslatableKey(card))),
+                        // TODO .withColor(deck.getCardColor(card))
                         List.of(slot, foundationPiles.get(card.suit()))
                     );
                 }
@@ -431,7 +432,8 @@ public class SolitaireGame extends CardGame<SolitaireGame> {
             Card card = wastePile.getLast();
             if (foundationPiles.get(card.suit()).canInsertCard(currentPlayer, List.of(card), -1)) {
                 return Pair.of(
-                    Component.translatable("message.charta.move_card_from_waste_to_foundation", Component.translatable(deck.getCardTranslatableKey(card)).withColor(deck.getCardColor(card))),
+                    Component.translatable("message.charta.move_card_from_waste_to_foundation", Component.translatable(deck.getCardTranslatableKey(card))),
+                    // TODO .withColor(deck.getCardColor(card))
                     List.of(wastePile, foundationPiles.get(card.suit()))
                 );
             }
@@ -447,7 +449,8 @@ public class SolitaireGame extends CardGame<SolitaireGame> {
                     if (fromSlot == toSlot) continue;
                     if (toSlot.canInsertCard(currentPlayer, List.of(card), -1)) {
                         return Pair.of(
-                            Component.translatable("message.charta.move_card_from_tableau_to_tableau", Component.translatable(deck.getCardTranslatableKey(card)).withColor(deck.getCardColor(card))),
+                            Component.translatable("message.charta.move_card_from_tableau_to_tableau", Component.translatable(deck.getCardTranslatableKey(card))),
+                            // todo .withColor(deck.getCardColor(card))
                             List.of(fromSlot, toSlot)
                         );
                     }
@@ -461,7 +464,8 @@ public class SolitaireGame extends CardGame<SolitaireGame> {
             for (GameSlot slot : tableauPiles) {
                 if (slot.canInsertCard(currentPlayer, List.of(card), -1)) {
                     return Pair.of(
-                        Component.translatable("message.charta.move_card_from_waste_to_tableau", Component.translatable(deck.getCardTranslatableKey(card)).withColor(deck.getCardColor(card))),
+                        Component.translatable("message.charta.move_card_from_waste_to_tableau", Component.translatable(deck.getCardTranslatableKey(card))),
+                        // TODO .withColor(deck.getCardColor(card))
                         List.of(wastePile, slot)
                     );
                 }

@@ -31,19 +31,21 @@ package dev.lucaargolo.charta.block;
 
 import dev.lucaargolo.charta.entity.SeatEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.neoforge.common.util.FakePlayer;
+import net.minecraftforge.common.util.FakePlayer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -72,8 +74,8 @@ public class SeatBlock extends Block {
     }
 
     @Override
-    protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hitResult) {
-        if(tryAndSit(state, level, pos, player)) {
+    public @NotNull InteractionResult use(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hitResult) {
+        if(player.getItemInHand(hand).isEmpty() && tryAndSit(state, level, pos, player)) {
             return InteractionResult.SUCCESS;
         }else{
             return InteractionResult.PASS;
@@ -88,7 +90,7 @@ public class SeatBlock extends Block {
         if (isSeatBlocked(level, pos)) return false;
         if (isSeatOccupied(level, pos)) {
             List<SeatEntity> seats = level.getEntitiesOfClass(SeatEntity.class, new AABB(pos));
-            return ejectSeatedExceptPlayer(level, seats.getFirst());
+            return ejectSeatedExceptPlayer(level, seats.get(0));
         }
 
 
@@ -114,7 +116,7 @@ public class SeatBlock extends Block {
 
     public static boolean ejectSeatedExceptPlayer(Level level, SeatEntity seatEntity) {
         List<Entity> passengers = seatEntity.getPassengers();
-        if (!passengers.isEmpty() && passengers.getFirst() instanceof Player) return false;
+        if (!passengers.isEmpty() && passengers.get(0) instanceof Player) return false;
         if (!level.isClientSide) seatEntity.ejectPassengers();
         return true;
     }
@@ -138,7 +140,7 @@ public class SeatBlock extends Block {
     }
 
     @Override
-    protected boolean isPathfindable(@NotNull BlockState state, @NotNull PathComputationType pathComputationType) {
+    public boolean isPathfindable(BlockState pState, BlockGetter pLevel, BlockPos pPos, PathComputationType pType) {
         return false;
     }
 

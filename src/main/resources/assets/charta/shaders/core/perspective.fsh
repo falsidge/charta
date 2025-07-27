@@ -14,8 +14,13 @@ in vec3 p;
 out vec4 fragColor;
 
 void main() {
+    if (p.z <= 0.0) discard;
     vec2 uv = (p.xy / p.z) - o;
-    vec4 color = texture(Sampler0, uv + 0.5);
+    vec2 sampledUV = uv + 0.5;
+    if (any(lessThan(sampledUV, vec2(0.0))) || any(greaterThan(sampledUV, vec2(1.0)))) {
+        discard;
+    }
+    vec4 color = texture(Sampler0, sampledUV);
     if (color.a < 0.1) {
         discard;
     }

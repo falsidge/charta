@@ -42,7 +42,7 @@ public class CardGames {
         return factories.get(gameId);
     }
 
-    public static ResourceLocation getGameId(CardGames.Factory<?> factory) {
+    public static ResourceLocation getGameId(Factory<?> factory) {
         return factories.entrySet().stream().filter(entry -> entry.getValue() == factory).map(Map.Entry::getKey).findFirst().orElse(Charta.MISSING_GAME);
     }
 

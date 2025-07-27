@@ -21,7 +21,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -86,12 +85,12 @@ public class OptionsScreen<G extends CardGame<G>> extends Screen {
             this.saveButton = this.addRenderableWidget(Button.builder(Component.translatable("button.charta.save"), b -> {
                 this.updateButtons(true);
                 ChartaClient.LOCAL_OPTIONS.put(gameId, this.game.getRawOptions());
-                PacketDistributor.sendToServer(new PlayerOptionsPayload(ChartaClient.LOCAL_OPTIONS));
+                Charta.INSTANCE.sendToServer(new PlayerOptionsPayload(ChartaClient.LOCAL_OPTIONS));
             }).bounds(width/2 - 32, height-25, 68, 20).tooltip(Tooltip.create(Component.translatable("message.charta.save_options"))).build());
             this.saveButton.active = false;
 
             this.addRenderableWidget(Button.builder(Component.translatable("button.charta.start"), b -> {
-                PacketDistributor.sendToServer(new CardTableSelectGamePayload(pos, gameId, this.game.getRawOptions()));
+                Charta.INSTANCE.sendToServer(new CardTableSelectGamePayload(pos, gameId, this.game.getRawOptions()));
                 onClose();
             }).bounds(width/2 + 44, height-25, 68, 20).tooltip(Tooltip.create(Component.translatable("message.charta.start_options"))).build());
         }
@@ -143,7 +142,7 @@ public class OptionsScreen<G extends CardGame<G>> extends Screen {
         protected final BooleanList changed = new BooleanArrayList();
 
         public OptionsWidget(Minecraft minecraft, int width, int height, int y) {
-            super(minecraft, width, height, y, 25);
+            super(minecraft, width, height, y, y+height, 25);
         }
 
         @Override

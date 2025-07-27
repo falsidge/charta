@@ -27,8 +27,8 @@ public abstract class MobMixin extends LivingEntity implements LeashableMixed {
     }
 
     @Inject(at = @At("TAIL"), method = "defineSynchedData")
-    public void defineSynchedData(SynchedEntityData.Builder builder, CallbackInfo ci) {
-        builder.define(Charta.MOB_IRON_LEASH, false);
+    public void defineSynchedData(CallbackInfo ci) {
+        ((LivingEntity) this).getEntityData().define(Charta.MOB_IRON_LEASH, false);
     }
 
     @Inject(at = @At("TAIL"), method = "addAdditionalSaveData")

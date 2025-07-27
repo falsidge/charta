@@ -1,58 +1,56 @@
 package dev.lucaargolo.charta.network;
 
-import dev.lucaargolo.charta.Charta;
 import dev.lucaargolo.charta.game.fun.FunMenu;
 import dev.lucaargolo.charta.game.fun.FunScreen;
 import dev.lucaargolo.charta.mixed.LivingEntityMixed;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.PacketFlow;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
-import org.jetbrains.annotations.NotNull;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.NetworkEvent;
 
-public record LastFunPayload(ItemStack deckStack) implements CustomPacketPayload {
+import java.util.function.Supplier;
+
+public record LastFunPayload(ItemStack deckStack) {
 
     public LastFunPayload() {
         this(ItemStack.EMPTY);
     }
 
-    public static final Type<LastFunPayload> TYPE = new Type<>(Charta.id("last_fun"));
+//    public static final Type<LastFunPayload> TYPE = new Type<>(Charta.id("last_fun"));
+//
+//    private static final StreamCodec<ByteBuf, ItemStack> STACK_STREAM = ByteBufCodecs.fromCodecTrusted(ItemStack.OPTIONAL_CODEC);
+//    public static StreamCodec<ByteBuf, LastFunPayload> STREAM_CODEC = StreamCodec.composite(
+//            STACK_STREAM,
+//            LastFunPayload::deckStack,
+//            LastFunPayload::new
+//    );
 
-    private static final StreamCodec<ByteBuf, ItemStack> STACK_STREAM = ByteBufCodecs.fromCodecTrusted(ItemStack.OPTIONAL_CODEC);
-    public static StreamCodec<ByteBuf, LastFunPayload> STREAM_CODEC = StreamCodec.composite(
-            STACK_STREAM,
-            LastFunPayload::deckStack,
-            LastFunPayload::new
-    );
-
-    public static void handleBoth(LastFunPayload payload, IPayloadContext context) {
-        if(context.flow() == PacketFlow.SERVERBOUND) {
-            handleServer(payload, context);
+    public void handleBoth(Supplier<NetworkEvent.Context> context) {
+        if(context.get().getDirection() == NetworkDirection.PLAY_TO_SERVER) {
+            handleServer(context);
         }else{
-            handleClient(payload, context);
+            handleClient(context);
         }
+        context.get().setPacketHandled(true);
     }
 
-    public static void handleServer(LastFunPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            Player player = context.player();
+    public void handleServer(Supplier<NetworkEvent.Context> context) {
+        context.get().enqueueWork(() -> {
+            Player player = context.get().getSender();
             if(player instanceof ServerPlayer serverPlayer && serverPlayer.containerMenu instanceof FunMenu funMenu) {
                 funMenu.getGame().sayLast(((LivingEntityMixed) player).charta_getCardPlayer());
             }
         });
     }
 
-    public static void handleClient(LastFunPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> displayTotemEffect(payload.deckStack));
+    public void handleClient(Supplier<NetworkEvent.Context> context){
+        context.get().enqueueWork(() -> displayTotemEffect(deckStack));
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -64,9 +62,15 @@ public record LastFunPayload(ItemStack deckStack) implements CustomPacketPayload
         }
     }
 
-    @Override
-    public @NotNull CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
-        return TYPE;
+//    @Override
+//    public @NotNull CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
+//        return TYPE;
+//    }
+    public void toBytes(FriendlyByteBuf buf) {
+            buf.writeItemStack(deckStack, false);
     }
-
+    public static LastFunPayload fromBytes(FriendlyByteBuf buf)
+    {
+        return new LastFunPayload(buf.readItem());
+    }
 }

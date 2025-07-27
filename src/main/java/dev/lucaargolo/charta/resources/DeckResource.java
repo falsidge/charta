@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 public class DeckResource implements ResourceManagerReloadListener {
 
-    private static final Deck MISSING = Deck.simple(Rarity.COMMON, false, Charta.MISSING_CARD, Charta.MISSING_CARD);
+    public static final Deck MISSING = Deck.simple(Rarity.COMMON, false, Charta.MISSING_CARD, Charta.MISSING_CARD);
 
     private LinkedHashMap<ResourceLocation, Deck> decks = new LinkedHashMap<>();
 
@@ -38,7 +38,8 @@ public class DeckResource implements ResourceManagerReloadListener {
                 try(InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
                     JsonElement json = JsonParser.parseReader(reader);
                     DataResult<Deck> cardDeck = Deck.CODEC.parse(JsonOps.INSTANCE, json);
-                    decks.put(location, cardDeck.getOrThrow());
+                    // TODO Decode
+                    decks.put(location, cardDeck.getOrThrow(false, (e)->{throw new RuntimeException(e);}));
                 }
             }catch (IOException e) {
                 Charta.LOGGER.error("Error while reading deck {} :", id, e);

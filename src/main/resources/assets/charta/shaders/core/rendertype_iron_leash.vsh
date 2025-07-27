@@ -19,6 +19,6 @@ flat out vec4 vertexColor;
 void main() {
     gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
 
-    vertexDistance = fog_distance(Position, FogShape);
+    vertexDistance = fog_distance(mat4(1.0),Position, FogShape);
     vertexColor = Color * ColorModulator * texelFetch(Sampler2, UV2 / 16, 0);
 }

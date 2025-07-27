@@ -21,7 +21,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -99,7 +98,7 @@ public class TableScreen extends Screen {
 
         public Game(ResourceLocation gameId, CardGames.Factory<G> gameFactory) {
             super(0, 0, 70, 70, Component.translatable(gameId.toLanguageKey()), (button) -> {
-                PacketDistributor.sendToServer(new CardTableSelectGamePayload(pos, gameId, ChartaClient.LOCAL_OPTIONS.getOrDefault(gameId, new byte[0])));
+                Charta.INSTANCE.sendToServer(new CardTableSelectGamePayload(pos, gameId, ChartaClient.LOCAL_OPTIONS.getOrDefault(gameId, new byte[0])));
                 onClose();
             }, Button.DEFAULT_NARRATION);
 
@@ -151,12 +150,12 @@ public class TableScreen extends Screen {
             }
             if(this.isHovered()) {
                 if(this.active) {
-                    guiGraphics.fill(this.getX(), this.getY(), this.getX()+70, this.getY()+70, 0x33FFFFFF);
+                    guiGraphics.fill(this.getX(), this.getY(), this.getX()+this.getWidth(), this.getY()+this.getHeight(), 0x33FFFFFF);
                 }else{
-                    guiGraphics.fill(this.getX()+2, this.getY()+2, this.getX()+68, this.getY()+68, 0x33FFFFFF);
+                    guiGraphics.fill(this.getX()+2, this.getY()+2, this.getX()+this.getWidth()-2, this.getY()+this.getHeight()-2, 0x33FFFFFF);
                 }
             }else if(isShiftDown()) {
-                guiGraphics.fill(this.getX()+2, this.getY()+2, this.getX()+68, this.getY()+68, 0x66000000);
+                guiGraphics.fill(this.getX()+2, this.getY()+2, this.getX()+this.getWidth()-2, this.getY()+this.getHeight()-2, 0x66000000);
             }
         }
 
@@ -221,22 +220,22 @@ public class TableScreen extends Screen {
         private final int amount;
 
         public GameWidget(Minecraft minecraft, int width, int height, int y) {
-            super(minecraft, width, height, y, 75);
+            super(minecraft, width, height, y, y+height, 75); // TODO
             int margin = width - 40;
             this.amount = margin/75;
         }
 
         public void addEntry(@NotNull Game<G> entry) {
-            if(this.children().isEmpty() || this.children().getLast().games.size() >= amount) {
+            if(this.children().isEmpty() || this.children().get(this.children().size()-1).games.size() >= amount) {
                 this.addEntry(new GameRow<>());
             }
-            this.children().getLast().games.add(entry);
+            this.children().get(this.children().size()-1).games.add(entry);
 
             Component play = Component.literal("\ue037").withStyle(Charta.SYMBOLS);
             Button playWidget = Button.builder(play, button -> entry.onPress()).bounds(0, 0, 20, 20).build();
             playWidget.active = entry.active;
             playWidget.setTooltip(Tooltip.create(entry.tooltip != null ? entry.tooltip : Component.translatable("message.charta.play_game")));
-            this.children().getLast().plays.add(playWidget);
+            this.children().get(this.children().size()-1).plays.add(playWidget);
 
             Component config = Component.literal("\uE8B8").withStyle(Charta.SYMBOLS);
             Button configWidget = Button.builder(config, button -> {
@@ -244,7 +243,7 @@ public class TableScreen extends Screen {
             }).bounds(0, 0, 20, 20).build();
             configWidget.active = entry.active && !entry.game.getOptions().isEmpty();
             configWidget.setTooltip(Tooltip.create(Component.translatable("message.charta.configure_game")));
-            this.children().getLast().configs.add(configWidget);
+            this.children().get(this.children().size()-1).configs.add(configWidget);
         }
 
         @Override

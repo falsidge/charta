@@ -91,7 +91,7 @@ public class CrazyEightsGame extends CardGame<CrazyEightsGame> {
 
     private CardPlayer getNextPlayer() {
         if(currentPlayer == null) {
-            return getPlayers().getFirst();
+            return getPlayers().get(0);
         }else{
             int indexOf = getPlayers().indexOf(currentPlayer);
             return getPlayers().get((indexOf + 1) % players.size());
@@ -193,20 +193,20 @@ public class CrazyEightsGame extends CardGame<CrazyEightsGame> {
                     nextPlayerAndRunGame();
                 }
             }else if(!currentPlayer.shouldCompute() || canPlay(currentPlayer, play)) {
-                Card card = play.cards().getLast();
+                Card card = play.cards().get(play.cards().size()-1);
                 currentPlayer.playSound(ModSounds.CARD_PLAY.get());
                 currentSuit = card.suit();
 
                 if(isChoosingWild) {
                     //Player was choosing the suit from a wild card.
-                    play(currentPlayer, Component.translatable("message.charta.chose_a_suit", Component.translatable(deck.getSuitTranslatableKey(currentSuit)).withColor(deck.getSuitColor(currentSuit))));
+                    play(currentPlayer, Component.translatable("message.charta.chose_a_suit", Component.translatable(deck.getSuitTranslatableKey(currentSuit)))); //TODO .withColor(deck.getSuitColor(currentSuit))
                     //If the player was not a bot, there will be an extra card in the play pile, so we need to remove it.
                     if(!currentPlayer.shouldCompute()) {
                         playPile.removeLast();
                     }
                     isChoosingWild = false;
                 }else{
-                    play(currentPlayer, Component.translatable("message.charta.played_a_card", Component.translatable(deck.getCardTranslatableKey(card)).withColor(deck.getCardColor(card))));
+                    play(currentPlayer, Component.translatable("message.charta.played_a_card", Component.translatable(deck.getCardTranslatableKey(card))));// TODO .withColor(deck.getCardColor(card))
                 }
 
                 //If the player is a bot, we need to manually remove the card from its hand and censored hand, and add it to the play pile.
@@ -269,7 +269,7 @@ public class CrazyEightsGame extends CardGame<CrazyEightsGame> {
         if(cards.size() != 1) {
             return false;
         }
-        Card card = cards.getLast();
+        Card card = cards.get(cards.size()-1);
         Card lastCard = playPile.getLast();
         return isGameReady && lastCard != null && ((isChoosingWild && card.rank() == Rank.EIGHT) || card.rank() == Rank.EIGHT || card.rank() == lastCard.rank() || card.suit() == currentSuit);
     }

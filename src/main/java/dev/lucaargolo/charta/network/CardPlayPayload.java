@@ -1,39 +1,36 @@
 package dev.lucaargolo.charta.network;
 
-import dev.lucaargolo.charta.Charta;
 import dev.lucaargolo.charta.client.ChartaClient;
 import dev.lucaargolo.charta.client.gui.screens.HistoryScreen;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.network.NetworkEvent;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
-import org.jetbrains.annotations.NotNull;
 
-public record CardPlayPayload(Component playerName, int playerCards, Component play) implements CustomPacketPayload {
+import java.util.function.Supplier;
 
-    public static final CustomPacketPayload.Type<CardPlayPayload> TYPE = new CustomPacketPayload.Type<>(Charta.id("card_play"));
+public record CardPlayPayload(Component playerName, int playerCards, Component play) {
+//
+//    public static final CustomPacketPayload.Type<CardPlayPayload> TYPE = new CustomPacketPayload.Type<>(Charta.id("card_play"));
+//
+//    public static StreamCodec<ByteBuf, CardPlayPayload> STREAM_CODEC = StreamCodec.composite(
+//        ComponentSerialization.TRUSTED_CONTEXT_FREE_STREAM_CODEC,
+//        CardPlayPayload::playerName,
+//        ByteBufCodecs.INT,
+//        CardPlayPayload::playerCards,
+//        ComponentSerialization.TRUSTED_CONTEXT_FREE_STREAM_CODEC,
+//        CardPlayPayload::play,
+//        CardPlayPayload::new
+//    );
 
-    public static StreamCodec<ByteBuf, CardPlayPayload> STREAM_CODEC = StreamCodec.composite(
-        ComponentSerialization.TRUSTED_CONTEXT_FREE_STREAM_CODEC,
-        CardPlayPayload::playerName,
-        ByteBufCodecs.INT,
-        CardPlayPayload::playerCards,
-        ComponentSerialization.TRUSTED_CONTEXT_FREE_STREAM_CODEC,
-        CardPlayPayload::play,
-        CardPlayPayload::new
-    );
-
-    public static void handleClient(CardPlayPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            addToHistory(payload.playerName, payload.playerCards, payload.play);
+    public void handleClient(Supplier<NetworkEvent.Context> context) {
+        context.get().enqueueWork(() -> {
+            addToHistory(playerName, playerCards, play);
         });
+        context.get().setPacketHandled(true);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -45,9 +42,17 @@ public record CardPlayPayload(Component playerName, int playerCards, Component p
         }
     }
 
-    @Override
-    public @NotNull CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
-        return TYPE;
+//    @Override
+//    public @NotNull CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
+//        return TYPE;
+//    }
+    public void toBytes(FriendlyByteBuf buf) {
+        buf.writeComponent(playerName);
+        buf.writeInt(playerCards);
+        buf.writeComponent(play);
     }
-
+    public static CardPlayPayload fromBytes(FriendlyByteBuf buf)
+    {
+        return new CardPlayPayload(buf.readComponent(), buf.readInt(), buf.readComponent());
+    }
 }

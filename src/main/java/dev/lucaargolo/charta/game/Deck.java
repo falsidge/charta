@@ -4,23 +4,23 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.lucaargolo.charta.Charta;
 import dev.lucaargolo.charta.client.ChartaClient;
 import dev.lucaargolo.charta.compat.IrisCompat;
 import dev.lucaargolo.charta.game.fun.FunGame;
 import dev.lucaargolo.charta.utils.CardImageUtils;
-import dev.lucaargolo.charta.utils.ExpandedStreamCodec;
 import dev.lucaargolo.charta.utils.SuitImage;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -28,30 +28,35 @@ public class Deck {
 
     public static final Deck EMPTY = new Deck(Rarity.COMMON, false, List.of(), s -> Charta.MISSING_SUIT, s -> "suit.charta.unknown", c -> Charta.MISSING_CARD, c -> "card.charta.unknown", () -> Charta.MISSING_DECK, () -> "deck.charta.unknown");
 
-    public static final StreamCodec<ByteBuf, Deck> STREAM_CODEC = ExpandedStreamCodec.composite(
-        Rarity.STREAM_CODEC,
-        Deck::getRarity,
-        ByteBufCodecs.BOOL,
-        Deck::isTradeable,
-        ByteBufCodecs.collection(ArrayList::new, Card.STREAM_CODEC),
-        Deck::getCards,
-        ByteBufCodecs.map(HashMap::new, Suit.STREAM_CODEC, ResourceLocation.STREAM_CODEC),
-        Deck::getSuitsLocation,
-        ByteBufCodecs.map(HashMap::new, Suit.STREAM_CODEC, ByteBufCodecs.STRING_UTF8),
-        Deck::getSuitsTranslatableKeys,
-        ByteBufCodecs.map(HashMap::new, Card.STREAM_CODEC, ResourceLocation.STREAM_CODEC),
-        Deck::getCardsLocation,
-        ByteBufCodecs.map(HashMap::new, Card.STREAM_CODEC, ByteBufCodecs.STRING_UTF8),
-        Deck::getCardsTranslatableKeys,
-        ResourceLocation.STREAM_CODEC,
-        Deck::getDeckLocation,
-        ByteBufCodecs.STRING_UTF8,
-        Deck::getDeckTranslatableKey,
-        Deck::new
-    );
+//    public static final StreamCodec<ByteBuf, Deck> STREAM_CODEC = ExpandedStreamCodec.composite(
+//        Rarity.STREAM_CODEC,
+//        Deck::getRarity,
+//        ByteBufCodecs.BOOL,
+//        Deck::isTradeable,
+//        ByteBufCodecs.collection(ArrayList::new, Card.STREAM_CODEC),
+//        Deck::getCards,
+//        ByteBufCodecs.map(HashMap::new, Suit.STREAM_CODEC, ResourceLocation.STREAM_CODEC),
+//        Deck::getSuitsLocation,
+//        ByteBufCodecs.map(HashMap::new, Suit.STREAM_CODEC, ByteBufCodecs.STRING_UTF8),
+//        Deck::getSuitsTranslatableKeys,
+//        ByteBufCodecs.map(HashMap::new, Card.STREAM_CODEC, ResourceLocation.STREAM_CODEC),
+//        Deck::getCardsLocation,
+//        ByteBufCodecs.map(HashMap::new, Card.STREAM_CODEC, ByteBufCodecs.STRING_UTF8),
+//        Deck::getCardsTranslatableKeys,
+//        ResourceLocation.STREAM_CODEC,
+//        Deck::getDeckLocation,
+//        ByteBufCodecs.STRING_UTF8,
+//        Deck::getDeckTranslatableKey,
+//        Deck::new
+//    );
+//
+public static final Codec<Rarity> RARITY_CODEC = Codec.STRING.flatXmap((i)->
+                DataResult.success(Rarity.valueOf(i.toUpperCase())),
+        (rarity)->DataResult.success(rarity.toString().toLowerCase())
+        );
 
     public static final Codec<Deck> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        Rarity.CODEC.fieldOf("rarity").forGetter(Deck::getRarity),
+            RARITY_CODEC.fieldOf("rarity").forGetter(Deck::getRarity),
         Codec.BOOL.fieldOf("tradeable").forGetter(Deck::isTradeable),
         Card.CODEC.listOf().fieldOf("cards").forGetter(Deck::getCards),
         Codec.unboundedMap(Suit.CODEC, ResourceLocation.CODEC).fieldOf("suits_images").forGetter(Deck::getSuitsLocation),

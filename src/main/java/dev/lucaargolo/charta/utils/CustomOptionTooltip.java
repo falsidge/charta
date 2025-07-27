@@ -37,13 +37,14 @@ public class CustomOptionTooltip extends Tooltip {
             return fallback.toCharSequence(minecraft);
         } else {
             Language language = Language.getInstance();
-            if (this.cachedTooltip == null || language != this.splitWithLanguage) {
+            if (this.cachedTooltip == null) {
+                // TODO language
                 List<FormattedCharSequence> tooltip = new ArrayList<>(splitTooltip(minecraft, this.message));
                 tooltip.add(Component.empty().getVisualOrderText());
                 tooltip.add(Component.translatable("message.charta.original", Component.literal(original).withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.RED).getVisualOrderText());
                 tooltip.add(Component.translatable("message.charta.current", Component.literal(current).withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.RED).getVisualOrderText());
                 this.cachedTooltip = tooltip;
-                this.splitWithLanguage = language;
+//                this.splitWithLanguage = language;
             }
 
             return this.cachedTooltip;

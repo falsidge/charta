@@ -10,9 +10,10 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.LeadItem;
 import net.minecraft.world.level.block.Block;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.RegistryObject;
+
 
 public class ModItems {
 
@@ -38,8 +39,8 @@ public class ModItems {
         });
     }
 
-    public static final DeferredHolder<Item, DeckItem> DECK = ITEMS.register("deck", () -> new DeckItem(new Item.Properties().stacksTo(1)));
-    public static final DeferredHolder<Item, LeadItem> IRON_LEAD = ITEMS.register("iron_lead", () -> new LeadItem(new Item.Properties()));
+    public static final RegistryObject<DeckItem> DECK = ITEMS.register("deck", () -> new DeckItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<LeadItem> IRON_LEAD = ITEMS.register("iron_lead", () -> new LeadItem(new Item.Properties()));
 
     public static void register(IEventBus bus) {
         ITEMS.register(bus);

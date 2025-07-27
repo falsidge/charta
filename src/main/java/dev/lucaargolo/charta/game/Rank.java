@@ -2,8 +2,6 @@ package dev.lucaargolo.charta.game;
 
 import com.mojang.serialization.DataResult;
 import dev.lucaargolo.charta.Charta;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,7 +11,7 @@ import java.util.Optional;
 public record Rank(ResourceLocation location, int ordinal) implements Comparable<Rank> {
 
     private static final LinkedHashSet<Rank> registry = new LinkedHashSet<>();
-    public static final StreamCodec<ByteBuf, Rank> STREAM_CODEC = StreamCodec.composite(ResourceLocation.STREAM_CODEC, Rank::location, l -> Rank.load(l).getOrThrow());
+//    public static final StreamCodec<ByteBuf, Rank> STREAM_CODEC = StreamCodec.composite(ResourceLocation.STREAM_CODEC, Rank::location, l -> Rank.load(l).getOrThrow());
 
     public static final Rank BLANK = new Rank(Charta.id("blank"), 0);
     public static final Rank ACE = new Rank(Charta.id("ace"), 1);

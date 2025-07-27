@@ -7,7 +7,8 @@ import dev.lucaargolo.charta.menu.AbstractCardMenu;
 import dev.lucaargolo.charta.menu.CardSlot;
 import dev.lucaargolo.charta.menu.HandSlot;
 import dev.lucaargolo.charta.menu.ModMenus;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerData;
@@ -41,8 +42,9 @@ public class CrazyEightsMenu extends AbstractCardMenu<CrazyEightsGame> {
         }
     };
 
-    public CrazyEightsMenu(int containerId, Inventory inventory, RegistryFriendlyByteBuf buf) {
-        this(containerId, inventory, ContainerLevelAccess.create(inventory.player.level(), buf.readBlockPos()), Deck.STREAM_CODEC.decode(buf), buf.readVarIntArray(), buf.readByteArray());
+    public CrazyEightsMenu(int containerId, Inventory inventory, FriendlyByteBuf buf) {
+        this(containerId, inventory, ContainerLevelAccess.create(inventory.player.level(), buf.readBlockPos()), Deck.CODEC.parse(NbtOps.INSTANCE, buf.readNbt()).getOrThrow(false, (s)->new RuntimeException(s)), buf.readVarIntArray(), buf.readByteArray());
+        // TODO deck decode
     }
 
     public CrazyEightsMenu(int containerId, Inventory inventory, ContainerLevelAccess access, Deck deck, int[] players, byte[] options) {

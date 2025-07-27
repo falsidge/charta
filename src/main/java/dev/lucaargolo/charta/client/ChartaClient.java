@@ -9,32 +9,32 @@ import dev.lucaargolo.charta.blockentity.ModBlockEntityTypes;
 import dev.lucaargolo.charta.client.blockentity.BarShelfBlockEntityRenderer;
 import dev.lucaargolo.charta.client.blockentity.CardTableBlockEntityRenderer;
 import dev.lucaargolo.charta.client.entity.IronLeashKnotRenderer;
-import dev.lucaargolo.charta.client.item.DeckItemExtensions;
 import dev.lucaargolo.charta.compat.IrisCompat;
 import dev.lucaargolo.charta.entity.ModEntityTypes;
 import dev.lucaargolo.charta.game.crazyeights.CrazyEightsScreen;
 import dev.lucaargolo.charta.game.fun.FunScreen;
 import dev.lucaargolo.charta.game.solitaire.SolitaireScreen;
-import dev.lucaargolo.charta.item.ModItems;
 import dev.lucaargolo.charta.menu.ModMenus;
 import dev.lucaargolo.charta.resources.MarkdownResource;
 import dev.lucaargolo.charta.utils.CardImageUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceProvider;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.event.*;
-import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
+import net.minecraftforge.client.event.RegisterShadersEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import org.apache.commons.lang3.tuple.Triple;
 
 import javax.annotation.Nullable;
@@ -139,7 +139,8 @@ public class ChartaClient {
     public static void processBlurEffect(float partialTick) {
         float f = 2f;
         if (glowBlurEffect != null) {
-            glowBlurEffect.setUniform("Radius", f);
+//            glowBlurEffect.setUniform("Radius", f);
+            //TODO FIx blur
             glowBlurEffect.process(partialTick);
         }
     }
@@ -160,7 +161,7 @@ public class ChartaClient {
         }
 
         try {
-            glowBlurEffect = new PostChain(minecraft.getTextureManager(), resourceProvider, getGlowRenderTarget(), BLUR_LOCATION);
+            glowBlurEffect = new PostChain(minecraft.getTextureManager(), minecraft.getResourceManager(), getGlowRenderTarget(), BLUR_LOCATION);
             glowBlurEffect.resize(minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight());
         } catch (IOException ioexception) {
             Charta.LOGGER.warn("Failed to load shader: {}", BLUR_LOCATION, ioexception);
@@ -185,13 +186,14 @@ public class ChartaClient {
 
         @SubscribeEvent
         public static void registerCoverModel(ModelEvent.RegisterAdditional event) {
-            event.register(new ModelResourceLocation(Charta.id("deck"), "standalone"));
+//            event.register(new ModelResourceLocation(Charta.id("deck"), "standalone"));\
+            event.register(Charta.id("deck"));
         }
 
-        @SubscribeEvent
-        public static void registerClientExtensions(RegisterClientExtensionsEvent event) {
-            event.registerItem(new DeckItemExtensions(), ModItems.DECK.get());
-        }
+//        @SubscribeEvent
+//        public static void registerClientExtensions(RegisterClientExtensionsEvent event) {
+////            event.registerItem(new DeckItemExtensions(), ModItems.DECK.get());
+//        }
 
         @SubscribeEvent
         public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
@@ -207,10 +209,13 @@ public class ChartaClient {
         }
 
         @SubscribeEvent
-        public static void registerMenuScreens(RegisterMenuScreensEvent event) {
-            event.register(ModMenus.CRAZY_EIGHTS.get(), CrazyEightsScreen::new);
-            event.register(ModMenus.FUN.get(), FunScreen::new);
-            event.register(ModMenus.SOLITAIRE.get(), SolitaireScreen::new);
+        public static void registerMenuScreens(FMLClientSetupEvent  event) {
+            event.enqueueWork(()->
+            {
+                MenuScreens.register(ModMenus.CRAZY_EIGHTS.get(), CrazyEightsScreen::new);
+                MenuScreens.register(ModMenus.FUN.get(), FunScreen::new);
+                MenuScreens.register(ModMenus.SOLITAIRE.get(), SolitaireScreen::new);
+            });
         }
 
         @SubscribeEvent

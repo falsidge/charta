@@ -115,7 +115,7 @@ public class CardSlot<G extends CardGame<G>> {
         VERTICAL
     }
 
-    public static float getWidth(CardSlot.Type type) {
+    public static float getWidth(Type type) {
         return switch (type) {
             case DEFAULT, VERTICAL -> CardImage.WIDTH * 1.5f;
             case HORIZONTAL -> 150;
@@ -128,7 +128,7 @@ public class CardSlot<G extends CardGame<G>> {
         return getWidth(slot.getType());
     }
 
-    public static float getHeight(CardSlot.Type type) {
+    public static float getHeight(Type type) {
         return switch (type) {
             case DEFAULT, HORIZONTAL -> CardImage.HEIGHT * 1.5f;
             case SMALL, PREVIEW -> CardImage.HEIGHT / 2f;

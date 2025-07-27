@@ -1,7 +1,10 @@
 package dev.lucaargolo.charta.utils;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.lucaargolo.charta.client.ChartaClient;
 import dev.lucaargolo.charta.compat.IrisCompat;
 import dev.lucaargolo.charta.game.Deck;
@@ -29,11 +32,12 @@ public class ChartaGuiGraphics {
         ResourceLocation textureLocation = deck.getSuitTexture(suit, false);
         ResourceLocation glowLocation = deck.getSuitTexture(suit, true);
         ChartaGuiGraphics.blitWhiteImage(parent, textureLocation, x, y, u, v, width, height, textureWidth, textureHeight);
-        ChartaClient.getGlowRenderTarget().bindWrite(false);
-        RenderSystem.setShaderColor(0f, 0f, 0f, 1f);
-        ChartaGuiGraphics.blitWhiteImage(parent, textureLocation, x, y, u, v, width, height, textureWidth, textureHeight);
-        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-        ChartaGuiGraphics.blitWhiteImageGlow(parent, glowLocation, x, y, u, v, width, height, textureWidth, textureHeight);
+//        ChartaClient.getGlowRenderTarget().bindWrite(false);
+//        RenderSystem.setShaderColor(0f, 0f, 0f, 1f);
+//        ChartaGuiGraphics.blitWhiteImage(parent, textureLocation, x, y, u, v, width, height, textureWidth, textureHeight);
+//        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+//        ChartaGuiGraphics.blitWhiteImageGlow(parent, glowLocation, x, y, u, v, width, height, textureWidth, textureHeight);
+        // TODO
         Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
     }
 
@@ -112,12 +116,13 @@ public class ChartaGuiGraphics {
     public static void innerBlit(GuiGraphics parent, float x1, float x2, float y1, float y2, float minU, float maxU, float minV, float maxV) {
         RenderSystem.enableBlend();
         Matrix4f matrix4f = parent.pose().last().pose();
-        BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferbuilder.addVertex(matrix4f, x1, y1, 0).setUv(minU, minV).setColor(1f, 1f, 1f, 1f);
-        bufferbuilder.addVertex(matrix4f, x1, y2, 0).setUv(minU, maxV).setColor(1f, 1f, 1f, 1f);
-        bufferbuilder.addVertex(matrix4f, x2, y2, 0).setUv(maxU, maxV).setColor(1f, 1f, 1f, 1f);
-        bufferbuilder.addVertex(matrix4f, x2, y1, 0).setUv(maxU, minV).setColor(1f, 1f, 1f, 1f);
-        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
+        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferbuilder.vertex(matrix4f, x1, y1, 0).uv(minU, minV).color(1f, 1f, 1f, 1f).endVertex();
+        bufferbuilder.vertex(matrix4f, x1, y2, 0).uv(minU, maxV).color(1f, 1f, 1f, 1f).endVertex();
+        bufferbuilder.vertex(matrix4f, x2, y2, 0).uv(maxU, maxV).color(1f, 1f, 1f, 1f).endVertex();
+        bufferbuilder.vertex(matrix4f, x2, y1, 0).uv(maxU, minV).color(1f, 1f, 1f, 1f).endVertex();
+        Tesselator.getInstance().end();
         RenderSystem.disableBlend();
     }
 

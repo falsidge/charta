@@ -22,7 +22,7 @@ public class MultiLineTooltip extends Tooltip {
     @Override
     public @NotNull List<FormattedCharSequence> toCharSequence(@NotNull Minecraft minecraft) {
         Language language = Language.getInstance();
-        if (this.cachedTooltip == null || language != this.splitWithLanguage) {
+        if (this.cachedTooltip == null) {
             List<FormattedCharSequence> lines = new ArrayList<>();
             for(Component component : this.components) {
                 List<FormattedCharSequence> split = splitTooltip(minecraft, component);
@@ -33,7 +33,8 @@ public class MultiLineTooltip extends Tooltip {
             }
 
             this.cachedTooltip = lines;
-            this.splitWithLanguage = language;
+//            this.splitWithLanguage = language;
+            // TODO wth
         }
 
         return this.cachedTooltip;

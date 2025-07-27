@@ -1,15 +1,19 @@
 package dev.lucaargolo.charta.game;
 
+import dev.lucaargolo.charta.client.gui.components.CustomCheckboxWidgdet;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.components.AbstractSliderButton;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.ContainerObjectSelectionList;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -120,12 +124,15 @@ public abstract class GameOption<T> {
 
         @OnlyIn(Dist.CLIENT)
         public Widget getWidget(Consumer<Boolean> consumer, Font font, int width, int height, boolean showcase) {
-            Checkbox.Builder builder = Checkbox.builder(this.getTitle(), font);
-            builder.tooltip(Tooltip.create(this.getDescription()));
-            builder.maxWidth(width);
-            builder.selected(this.get());
-            builder.onValueChange((checkbox, value) -> this.set(value));
-            Checkbox checkbox = builder.build();
+//            Checkbox.Builder builder = Checkbox.builder(this.getTitle(), font);
+//            builder.tooltip(Tooltip.create(this.getDescription()));
+//            builder.maxWidth(width);
+//            builder.selected(this.get());
+//            builder.onValueChange((checkbox, value) -> this.set(value));
+//            Checkbox checkbox = builder.build();
+            CustomCheckboxWidgdet checkbox = new CustomCheckboxWidgdet(0,0,width,height,this.getTitle(),this.get());
+            checkbox.setOnValueChange((checkbox2, value) -> this.set(value));
+            checkbox.setTooltip(Tooltip.create(this.getDescription()));
             this.consumer = b -> {
                 if(b != checkbox.selected()) checkbox.onPress();
                 consumer.accept(this.get());
@@ -163,10 +170,10 @@ public abstract class GameOption<T> {
             AbstractSliderButton slider = new AbstractSliderButton(0, 0, width, height, message.apply(this.get()), this.get() * (1.0/(max - min))) {
                 private static final ResourceLocation SLIDER_HANDLE_SPRITE = ResourceLocation.withDefaultNamespace("widget/slider_handle");
 
-                @Override
-                protected @NotNull ResourceLocation getHandleSprite() {
-                    return showcase ? SLIDER_HANDLE_SPRITE : super.getHandleSprite();
-                }
+//                @Override
+//                protected @NotNull ResourceLocation getHandleSprite() {
+//                    return showcase ? SLIDER_HANDLE_SPRITE : super.getHandleSprite();
+//                }
 
                 @Override
                 protected void updateMessage() {

@@ -2,7 +2,7 @@ package dev.lucaargolo.charta.block;
 
 import dev.lucaargolo.charta.Charta;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstrapContext;
+import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.entity.BannerPattern;
 
@@ -20,12 +20,12 @@ public class ModBannerPatterns {
 
     private static ResourceKey<BannerPattern> register(String name) {
         ResourceKey<BannerPattern> resourceKey = ResourceKey.create(Registries.BANNER_PATTERN, Charta.id(name));
-        BannerPattern pattern = new BannerPattern(resourceKey.location(), "block.minecraft.banner."+resourceKey.location().toShortLanguageKey());
+        BannerPattern pattern = new BannerPattern("block.minecraft.banner."+resourceKey.location().toShortLanguageKey());
         PATTERNS.put(resourceKey, pattern);
         return resourceKey;
     }
 
-    public static void bootstrap(BootstrapContext<BannerPattern> context) {
+    public static void bootstrap(BootstapContext<BannerPattern> context) {
         PATTERNS.forEach(context::register);
     }
 

@@ -38,7 +38,7 @@ public class MarkdownScreen extends Screen {
         super(title);
         this.parent = parent;
         String resourceId = I18n.get("charta_md:"+markdown);
-        ResourceLocation id = ResourceLocation.tryParse(resourceId);
+        ResourceLocation id = ResourceLocation.parse(resourceId);
         if (id != null) {
             this.markdown = ChartaClient.MARKDOWN.getMarkdown(id);
         }else{
@@ -233,7 +233,7 @@ public class MarkdownScreen extends Screen {
 
 
         public MarkdownWidget(Minecraft minecraft, int width, int height, int y) {
-            super(minecraft, width, height, y, 10);
+            super(minecraft, width, height, y, y+height, 10);
         }
 
         @Override

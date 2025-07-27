@@ -1,66 +1,64 @@
 package dev.lucaargolo.charta.network;
 
-import dev.lucaargolo.charta.Charta;
 import dev.lucaargolo.charta.blockentity.ModBlockEntityTypes;
 import dev.lucaargolo.charta.game.Card;
 import dev.lucaargolo.charta.game.GameSlot;
-import dev.lucaargolo.charta.utils.ExpandedStreamCodec;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
-import org.jetbrains.annotations.NotNull;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 
-public record GameSlotCompletePayload(BlockPos pos, int index, List<Card> cards, float x, float y, float z, float angle, Direction stackDirection, float maxStack, boolean centered) implements CustomPacketPayload  {
+public record GameSlotCompletePayload(BlockPos pos, int index, List<Card> cards, float x, float y, float z, float angle, Direction stackDirection, float maxStack, boolean centered)  {
 
     public GameSlotCompletePayload(BlockPos pos, int index, GameSlot slot) {
         this(pos, index, slot.stream().toList(), slot.getX(), slot.getY(), slot.getZ(), slot.getAngle(), slot.getStackDirection(), slot.getMaxStack(), slot.isCentered());
     }
 
-    public static final CustomPacketPayload.Type<GameSlotCompletePayload> TYPE = new CustomPacketPayload.Type<>(Charta.id("game_slot_complete"));
+//    public static final CustomPacketPayload.Type<GameSlotCompletePayload> TYPE = new CustomPacketPayload.Type<>(Charta.id("game_slot_complete"));
+//
+//    public static StreamCodec<ByteBuf, GameSlotCompletePayload> STREAM_CODEC = ExpandedStreamCodec.composite(
+//            BlockPos.STREAM_CODEC,
+//            GameSlotCompletePayload::pos,
+//            ByteBufCodecs.INT,
+//            GameSlotCompletePayload::index,
+//            ByteBufCodecs.collection(ArrayList::new, Card.STREAM_CODEC),
+//            GameSlotCompletePayload::cards,
+//            ByteBufCodecs.FLOAT,
+//            GameSlotCompletePayload::x,
+//            ByteBufCodecs.FLOAT,
+//            GameSlotCompletePayload::y,
+//            ByteBufCodecs.FLOAT,
+//            GameSlotCompletePayload::z,
+//            ByteBufCodecs.FLOAT,
+//            GameSlotCompletePayload::angle,
+//            Direction.STREAM_CODEC,
+//            GameSlotCompletePayload::stackDirection,
+//            ByteBufCodecs.FLOAT,
+//            GameSlotCompletePayload::maxStack,
+//            ByteBufCodecs.BOOL,
+//            GameSlotCompletePayload::centered,
+//            GameSlotCompletePayload::new
+//    );
 
-    public static StreamCodec<ByteBuf, GameSlotCompletePayload> STREAM_CODEC = ExpandedStreamCodec.composite(
-            BlockPos.STREAM_CODEC,
-            GameSlotCompletePayload::pos,
-            ByteBufCodecs.INT,
-            GameSlotCompletePayload::index,
-            ByteBufCodecs.collection(ArrayList::new, Card.STREAM_CODEC),
-            GameSlotCompletePayload::cards,
-            ByteBufCodecs.FLOAT,
-            GameSlotCompletePayload::x,
-            ByteBufCodecs.FLOAT,
-            GameSlotCompletePayload::y,
-            ByteBufCodecs.FLOAT,
-            GameSlotCompletePayload::z,
-            ByteBufCodecs.FLOAT,
-            GameSlotCompletePayload::angle,
-            Direction.STREAM_CODEC,
-            GameSlotCompletePayload::stackDirection,
-            ByteBufCodecs.FLOAT,
-            GameSlotCompletePayload::maxStack,
-            ByteBufCodecs.BOOL,
-            GameSlotCompletePayload::centered,
-            GameSlotCompletePayload::new
-    );
+//    @Override
+//    public @NotNull Type<? extends CustomPacketPayload> type() {
+//        return TYPE;
+//    }
 
-    @Override
-    public @NotNull Type<? extends CustomPacketPayload> type() {
-        return TYPE;
-    }
-
-    public static void handleClient(GameSlotCompletePayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> updateGameSlot(payload));
+    public void handleClient(Supplier<NetworkEvent.Context> context){
+        context.get().enqueueWork(() -> updateGameSlot(this));
+        context.get().setPacketHandled(true);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -86,5 +84,49 @@ public record GameSlotCompletePayload(BlockPos pos, int index, List<Card> cards,
             });
         }
     }
+    public void toBytes(FriendlyByteBuf buf) {
+        buf.writeBlockPos(pos);
+        buf.writeInt(index);
+        buf.writeInt(cards.size());
+        for (Card card : cards)
+        {
+            CompoundTag compoundTag = new CompoundTag();
+            compoundTag.put("card", Card.CODEC.encodeStart(NbtOps.INSTANCE, card).result().orElse(null));
+            buf.writeNbt(compoundTag) ;
+        }
+        buf.writeFloat(x);
+        buf.writeFloat(y);
+        buf.writeFloat(z);
+        buf.writeFloat(angle);
+        buf.writeInt(stackDirection.ordinal());
+        buf.writeFloat(maxStack);
+        buf.writeBoolean(centered);
+    }
+    public static GameSlotCompletePayload fromBytes(FriendlyByteBuf buf)
+    {
+        BlockPos pos1 = buf.readBlockPos();
+        int index1 = buf.readInt();
+        int cardListSize = buf.readInt();
+        List<Card> cardList = new ArrayList<>();
+        for (int i = 0;i < cardListSize;i++)
+        {
+            cardList.add(
+                    Card.CODEC.parse(NbtOps.INSTANCE, buf.readNbt().get("card"))
+                    .result().orElse(null)
+            );
+        }
 
+        return new GameSlotCompletePayload(
+                pos1,
+                index1,
+                cardList,
+                buf.readFloat(),
+                buf.readFloat(),
+                buf.readFloat(),
+                buf.readFloat(),
+                Direction.values()[buf.readInt()],
+                buf.readFloat(),
+                buf.readBoolean()
+        );
+    }
 }

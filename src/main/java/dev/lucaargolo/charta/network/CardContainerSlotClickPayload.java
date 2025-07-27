@@ -1,50 +1,46 @@
 package dev.lucaargolo.charta.network;
 
-import dev.lucaargolo.charta.Charta;
 import dev.lucaargolo.charta.game.Card;
 import dev.lucaargolo.charta.game.CardPlayer;
 import dev.lucaargolo.charta.game.GameSlot;
 import dev.lucaargolo.charta.menu.AbstractCardMenu;
 import dev.lucaargolo.charta.menu.CardSlot;
 import dev.lucaargolo.charta.mixed.LivingEntityMixed;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
-import org.jetbrains.annotations.NotNull;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.List;
+import java.util.function.Supplier;
 
-public record CardContainerSlotClickPayload(int containerId, int slotId, int cardId) implements CustomPacketPayload {
+public record CardContainerSlotClickPayload(int containerId, int slotId, int cardId)  {
 
-    public static final Type<CardContainerSlotClickPayload> TYPE = new Type<>(Charta.id("card_container_slot_click"));
+//    public static final Type<CardContainerSlotClickPayload> TYPE = new Type<>(Charta.id("card_container_slot_click"));
+//
+//    public static final StreamCodec<ByteBuf, CardContainerSlotClickPayload> STREAM_CODEC = StreamCodec.composite(
+//            ByteBufCodecs.INT,
+//            CardContainerSlotClickPayload::containerId,
+//            ByteBufCodecs.INT,
+//            CardContainerSlotClickPayload::slotId,
+//            ByteBufCodecs.INT,
+//            CardContainerSlotClickPayload::cardId,
+//            CardContainerSlotClickPayload::new
+//    );
 
-    public static final StreamCodec<ByteBuf, CardContainerSlotClickPayload> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.INT,
-            CardContainerSlotClickPayload::containerId,
-            ByteBufCodecs.INT,
-            CardContainerSlotClickPayload::slotId,
-            ByteBufCodecs.INT,
-            CardContainerSlotClickPayload::cardId,
-            CardContainerSlotClickPayload::new
-    );
-
-    public static void handleServer(CardContainerSlotClickPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            Player player = context.player();
-            if(player instanceof LivingEntityMixed mixed && player.containerMenu instanceof AbstractCardMenu<?> cardMenu && cardMenu.containerId == payload.containerId) {
+    public void handleServer(Supplier<NetworkEvent.Context> context) {
+        context.get().enqueueWork(() -> {
+            Player player = context.get().getSender();
+            if(player instanceof LivingEntityMixed mixed && player.containerMenu instanceof AbstractCardMenu<?> cardMenu && cardMenu.containerId == containerId) {
                 CardPlayer cardPlayer = mixed.charta_getCardPlayer();
-                CardSlot<?> slot = cardMenu.getCardSlot(payload.slotId);
+                CardSlot<?> slot = cardMenu.getCardSlot(slotId);
                 GameSlot carriedCards = cardMenu.getCarriedCards();
-                if(carriedCards.isEmpty() && slot.canRemoveCard(cardPlayer, payload.cardId)) {
+                if(carriedCards.isEmpty() && slot.canRemoveCard(cardPlayer, cardId)) {
                     slot.preUpdate();
-                    List<Card> cards = slot.removeCards(payload.cardId);
+                    List<Card> cards = slot.removeCards(cardId);
                     cardMenu.setCarriedCards(new GameSlot(cards));
                     slot.onRemove(cardPlayer, cards);
                     slot.postUpdate();
-                }else if(!carriedCards.isEmpty() && slot.canInsertCard(cardPlayer, carriedCards.stream().toList(), payload.cardId) && slot.insertCards(carriedCards, payload.cardId)) {
+                }else if(!carriedCards.isEmpty() && slot.canInsertCard(cardPlayer, carriedCards.stream().toList(), cardId) && slot.insertCards(carriedCards, cardId)) {
                     slot.preUpdate();
                     cardMenu.setCarriedCards(new GameSlot());
                     slot.onInsert(cardPlayer, carriedCards.stream().toList());
@@ -52,11 +48,20 @@ public record CardContainerSlotClickPayload(int containerId, int slotId, int car
                 }
             }
         });
+        context.get().setPacketHandled(true);
     }
 
-    @Override
-    public @NotNull Type<? extends CustomPacketPayload> type() {
-        return TYPE;
-    }
-
+//    @Override
+//    public @NotNull Type<? extends CustomPacketPayload> type() {
+//        return TYPE;
+//    }
+        public void toBytes(FriendlyByteBuf buf) {
+            buf.writeInt(containerId);
+            buf.writeInt(slotId);
+            buf.writeInt(cardId);
+        }
+        public static CardContainerSlotClickPayload fromBytes(FriendlyByteBuf buf)
+        {
+            return new CardContainerSlotClickPayload(buf.readInt(), buf.readInt(), buf.readInt());
+        }
 }

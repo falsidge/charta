@@ -49,7 +49,7 @@ public record CardPlayerHead(ResourceLocation texture, float u, float v, float u
         if(connection != null) {
             PlayerInfo info = connection.getPlayerInfo(player.getUUID());
             if(info != null) {
-                return new CardPlayerHead(info.getSkin().texture(), 8f, 8f, 8f, 8f, 64f, 64f);
+                return new CardPlayerHead(info.getSkinLocation(), 8f, 8f, 8f, 8f, 64f, 64f);
             }
         }
         return UNKNOWN;

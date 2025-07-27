@@ -1,47 +1,45 @@
 package dev.lucaargolo.charta.network;
 
-import dev.lucaargolo.charta.Charta;
 import dev.lucaargolo.charta.blockentity.ModBlockEntityTypes;
 import dev.lucaargolo.charta.game.GameSlot;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
-import org.jetbrains.annotations.NotNull;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.network.NetworkEvent;
 
-public record GameSlotPositionPayload(BlockPos pos, int index, float x, float y, float z, float angle) implements CustomPacketPayload {
+import java.util.function.Supplier;
 
-    public static final CustomPacketPayload.Type<GameSlotPositionPayload> TYPE = new CustomPacketPayload.Type<>(Charta.id("game_slot_position"));
+public record GameSlotPositionPayload(BlockPos pos, int index, float x, float y, float z, float angle)  {
+//
+//    public static final CustomPacketPayload.Type<GameSlotPositionPayload> TYPE = new CustomPacketPayload.Type<>(Charta.id("game_slot_position"));
+//
+//    public static StreamCodec<ByteBuf, GameSlotPositionPayload> STREAM_CODEC = StreamCodec.composite(
+//            BlockPos.STREAM_CODEC,
+//            GameSlotPositionPayload::pos,
+//            ByteBufCodecs.INT,
+//            GameSlotPositionPayload::index,
+//            ByteBufCodecs.FLOAT,
+//            GameSlotPositionPayload::x,
+//            ByteBufCodecs.FLOAT,
+//            GameSlotPositionPayload::y,
+//            ByteBufCodecs.FLOAT,
+//            GameSlotPositionPayload::z,
+//            ByteBufCodecs.FLOAT,
+//            GameSlotPositionPayload::angle,
+//            GameSlotPositionPayload::new
+//    );
 
-    public static StreamCodec<ByteBuf, GameSlotPositionPayload> STREAM_CODEC = StreamCodec.composite(
-            BlockPos.STREAM_CODEC,
-            GameSlotPositionPayload::pos,
-            ByteBufCodecs.INT,
-            GameSlotPositionPayload::index,
-            ByteBufCodecs.FLOAT,
-            GameSlotPositionPayload::x,
-            ByteBufCodecs.FLOAT,
-            GameSlotPositionPayload::y,
-            ByteBufCodecs.FLOAT,
-            GameSlotPositionPayload::z,
-            ByteBufCodecs.FLOAT,
-            GameSlotPositionPayload::angle,
-            GameSlotPositionPayload::new
-    );
+//    @Override
+//    public @NotNull Type<? extends CustomPacketPayload> type() {
+//        return TYPE;
+//    }
 
-    @Override
-    public @NotNull Type<? extends CustomPacketPayload> type() {
-        return TYPE;
-    }
-
-    public static void handleClient(GameSlotPositionPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> updateGameSlot(payload));
+    public void handleClient(Supplier<NetworkEvent.Context> context) {
+        context.get().enqueueWork(() -> updateGameSlot(this));
+        context.get().setPacketHandled(true);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -57,6 +55,27 @@ public record GameSlotPositionPayload(BlockPos pos, int index, float x, float y,
                 slot.setAngle(payload.angle);
             });
         }
+    }
+    public void toBytes(FriendlyByteBuf buf) {
+        buf.writeBlockPos(pos);
+        buf.writeInt(index);
+        buf.writeFloat(x);
+        buf.writeFloat(y);
+        buf.writeFloat(z);
+        buf.writeFloat(angle);
+    }
+    public static GameSlotPositionPayload fromBytes(FriendlyByteBuf buf)
+    {
+
+
+        return new GameSlotPositionPayload(
+                buf.readBlockPos(),
+                buf.readInt(),
+                buf.readFloat(),
+                buf.readFloat(),
+                buf.readFloat(),
+                buf.readFloat()
+        );
     }
 
 }

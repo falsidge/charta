@@ -36,7 +36,8 @@ public interface CardPlayer {
     Component getName();
 
     default Component getColoredName() {
-        return getName().copy().withColor(getColor().getTextureDiffuseColor());
+//        return getName().copy().withColor(getColor().getTextureDiffuseColor());
+        return getName().copy(); //TODO color
     }
 
     DyeColor getColor();

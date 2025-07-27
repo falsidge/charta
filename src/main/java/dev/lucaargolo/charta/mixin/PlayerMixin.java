@@ -1,5 +1,6 @@
 package dev.lucaargolo.charta.mixin;
 
+import dev.lucaargolo.charta.Charta;
 import dev.lucaargolo.charta.block.CardTableBlock;
 import dev.lucaargolo.charta.block.GameChairBlock;
 import dev.lucaargolo.charta.blockentity.CardTableBlockEntity;
@@ -15,7 +16,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -47,7 +48,7 @@ public abstract class PlayerMixin extends LivingEntity {
                         CardGame<?> currentGame = blockEntity.getGame();
                         if(currentGame != null && !currentGame.isGameOver()) {
                             if((Object) this instanceof ServerPlayer serverPlayer) {
-                                PacketDistributor.sendToPlayer(serverPlayer, new GameLeavePayload());
+                                Charta.INSTANCE.send(PacketDistributor.PLAYER.with(()->serverPlayer), new GameLeavePayload());
                             }
                             cir.setReturnValue(false);
                         }

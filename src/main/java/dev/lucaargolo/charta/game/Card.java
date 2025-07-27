@@ -2,9 +2,6 @@ package dev.lucaargolo.charta.game;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
@@ -22,19 +19,19 @@ public class Card implements Comparable<Card> {
                 }else{
                     rank = ResourceLocation.fromNamespaceAndPath(suit.getNamespace(), elements[1]);
                 }
-                return DataResult.success(new Card(Suit.load(suit).getOrThrow(), Rank.load(rank).getOrThrow()));
+                return DataResult.success(new Card(Suit.load(suit).get().orThrow(), Rank.load(rank).get().orThrow(),elements.length>=3));
             }catch (Exception e) {
                 return DataResult.error(() -> "Invalid card format: " + card);
             }
         }, Card::toString
     );
 
-    public static final StreamCodec<ByteBuf, Card> STREAM_CODEC = StreamCodec.composite(
-            Suit.STREAM_CODEC, Card::suit,
-            Rank.STREAM_CODEC, Card::rank,
-            ByteBufCodecs.BOOL, Card::flipped,
-            Card::new
-    );
+//    public static final StreamCodec<ByteBuf, Card> STREAM_CODEC = StreamCodec.composite(
+//            Suit.STREAM_CODEC, Card::suit,
+//            Rank.STREAM_CODEC, Card::rank,
+//            ByteBufCodecs.BOOL, Card::flipped,
+//            Card::new
+//    );
 
     public static final Card BLANK = new Card(Suit.BLANK, Rank.BLANK, true);
 
@@ -92,9 +89,9 @@ public class Card implements Comparable<Card> {
     public String toString() {
         if(suit.location().getNamespace().equals(rank.location().getNamespace())) {
             String namespace = suit.location().getNamespace();
-            return namespace + ":" + suit.location().getPath() + "_" + rank.location().getPath();
+            return namespace + ":" + suit.location().getPath() + "_" + rank.location().getPath() + (flipped ? "_flipped" : "");
         }else{
-            return suit + "_" + rank;
+            return suit + "_" + rank + (flipped ? "_flipped" : "");
         }
     }
 

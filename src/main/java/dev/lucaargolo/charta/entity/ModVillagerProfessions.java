@@ -6,25 +6,25 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.village.VillagerTradesEvent;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraftforge.event.village.VillagerTradesEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.util.List;
 
-@EventBusSubscriber(modid = Charta.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
+@Mod.EventBusSubscriber(modid = Charta.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ModVillagerProfessions {
 
     public static final DeferredRegister<VillagerProfession> VILLAGER_PROFESSIONS = DeferredRegister.create(Registries.VILLAGER_PROFESSION, Charta.MOD_ID);
 
     @SuppressWarnings("deprecation")
-    public static final DeferredHolder<VillagerProfession, VillagerProfession> DEALER = VILLAGER_PROFESSIONS.register("dealer", () -> new VillagerProfession(
+    public static final RegistryObject<VillagerProfession> DEALER = VILLAGER_PROFESSIONS.register("dealer", () -> new VillagerProfession(
         "dealer",
-        heldJob -> heldJob.is(ModPoiTypes.DEALER),
-        acquirableJob -> acquirableJob.is(ModPoiTypes.DEALER),
+        heldJob -> heldJob.get().equals(ModPoiTypes.DEALER.get()),
+        acquirableJob -> acquirableJob.get().equals(ModPoiTypes.DEALER.get()),
         ImmutableSet.of(),
         ImmutableSet.of(),
         SoundEvents.VILLAGER_WORK_CARTOGRAPHER

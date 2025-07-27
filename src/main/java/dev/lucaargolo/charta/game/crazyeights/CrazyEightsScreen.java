@@ -5,6 +5,7 @@ import dev.lucaargolo.charta.client.gui.screens.GameScreen;
 import dev.lucaargolo.charta.game.CardPlayer;
 import dev.lucaargolo.charta.game.Suit;
 import dev.lucaargolo.charta.utils.ChartaGuiGraphics;
+import dev.lucaargolo.charta.utils.PortUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -48,9 +49,9 @@ public class CrazyEightsScreen extends GameScreen<CrazyEightsGame, CrazyEightsMe
         DyeColor color = player.getColor();
         if(menu.isGameReady()) {
             if (menu.isCurrentPlayer()) {
-                text = Component.translatable("message.charta.your_turn").withStyle(s -> s.withColor(color.getTextureDiffuseColor()));
+                text = Component.translatable("message.charta.your_turn").withStyle(s -> s.withColor(PortUtils.fromArrayColors(color.getTextureDiffuseColors())));
             } else {
-                text = Component.translatable("message.charta.other_turn", player.getName()).withStyle(s -> s.withColor(color.getTextureDiffuseColor()));
+                text = Component.translatable("message.charta.other_turn", player.getName()).withStyle(s -> s.withColor(PortUtils.fromArrayColors(color.getTextureDiffuseColors())));
             }
             guiGraphics.drawString(font, text, imageWidth / 2 - font.width(text) / 2, 105, 0xFFFFFFFF);
             text = Component.translatable("message.charta.draws_left", menu.getDrawsLeft());

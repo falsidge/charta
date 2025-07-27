@@ -3,10 +3,8 @@ package dev.lucaargolo.charta.game;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import dev.lucaargolo.charta.Charta;
-import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +18,7 @@ public class Suit implements Comparable<Suit> {
     private static final LinkedHashSet<Suit> registry = new LinkedHashSet<>();
     private static final Int2ObjectMap<Suit> backing = new Int2ObjectArrayMap<>();
 
-    public static final StreamCodec<ByteBuf, Suit> STREAM_CODEC = StreamCodec.composite(ResourceLocation.STREAM_CODEC, Suit::location, l -> Suit.load(l).getOrThrow());
+//    public static final StreamCodec<ByteBuf, Suit> STREAM_CODEC = StreamCodec.composite(ResourceLocation.STREAM_CODEC, Suit::location, l -> Suit.load(l).getOrThrow());
     public static final Codec<Suit> CODEC = ResourceLocation.CODEC.comapFlatMap(Suit::load, r -> r.location);
 
     public static final Suit BLANK = new Suit(Charta.id("blank"));

@@ -61,7 +61,7 @@ public class CardEditor extends JFrame {
                 try {
                     List<File> files = (List<File>) support.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
                     if(!files.isEmpty()) {
-                        loadImageFile(files.getFirst());
+                        loadImageFile(files.get(0));
                     }
                     return true;
                 } catch (Exception e) {
