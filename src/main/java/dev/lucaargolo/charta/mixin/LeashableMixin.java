@@ -7,6 +7,7 @@
 //import net.minecraft.core.BlockPos;
 //import net.minecraft.world.entity.Entity;
 //import net.minecraft.world.entity.Leas;
+//import net.minecraft.world.entity.Mob;
 //import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 //import net.minecraft.world.level.ItemLike;
 //import net.minecraft.world.level.Level;
@@ -16,7 +17,7 @@
 //import org.spongepowered.asm.mixin.injection.ModifyArg;
 //import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 //
-//@Mixin(Leashable.class)
+//@Mixin(Mob.class)
 //public interface LeashableMixin {
 //
 //    @Inject(at = @At("HEAD"), method = "setLeashedTo(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/entity/Entity;Z)V", cancellable = true)

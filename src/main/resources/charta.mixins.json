@@ -3,12 +3,14 @@
   "minVersion": "0.8",
   "package": "dev.lucaargolo.charta.mixin",
   "compatibilityLevel": "JAVA_17",
-  "refmap": "chartalegacy.refmap.json",
+  "refmap": "charta.refmap.json",
   "mixins": [
     "ChunkHolderMixin",
     "ContainerListenerMixin",
     "ContainerSynchronizerMixin",
+    "EntityMixin",
     "FenceBlockMixin",
+    "LeadItemMixin",
     "LivingEntityMixin",
     "MobMixin",
     "PlayerMixin",
@@ -16,6 +18,7 @@
   ],
   "client": [
     "ChatComponentMixin",
+    "EntityRendererMixin",
     "MinecraftMixin"
   ],
   "injectors": {

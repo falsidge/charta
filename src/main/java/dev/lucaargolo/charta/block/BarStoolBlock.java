@@ -69,7 +69,6 @@ public class BarStoolBlock extends SeatBlock {
 
     @Override
     public @NotNull InteractionResult use(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hitResult) {
-        if (!player.getItemInHand(hand).isEmpty()) return InteractionResult.PASS;
         if(tryAndSetCloth(state, level, pos, player)) {
             return InteractionResult.SUCCESS;
         }else if(tryAndSit(state, level, pos, player)) {

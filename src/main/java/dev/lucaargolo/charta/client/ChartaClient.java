@@ -140,7 +140,7 @@ public class ChartaClient {
         float f = 2f;
         if (glowBlurEffect != null) {
 //            glowBlurEffect.setUniform("Radius", f);
-            //TODO FIx blur
+            //TODO Fix blur
             glowBlurEffect.process(partialTick);
         }
     }

@@ -8,8 +8,11 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkEvent;
 
+import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public record CardDecksPayload(LinkedHashMap<ResourceLocation, Deck> cardDecks) {
 
@@ -37,6 +40,10 @@ public record CardDecksPayload(LinkedHashMap<ResourceLocation, Deck> cardDecks) 
     }
     public static CardDecksPayload fromBytes(FriendlyByteBuf buf)
     {
-        return new CardDecksPayload(new LinkedHashMap<>(buf.readMap(FriendlyByteBuf::readResourceLocation,(buf3)->Deck.CODEC.parse(NbtOps.INSTANCE, buf3.readNbt()).result().orElse(null))));
+        return new CardDecksPayload(buf.readMap(FriendlyByteBuf::readResourceLocation,(buf3)->Deck.CODEC.parse(NbtOps.INSTANCE, buf3.readNbt()).result().orElse(null)).entrySet().stream().sorted(Comparator.comparing((Map.Entry<ResourceLocation, Deck> entry) -> entry.getValue().isTradeable()).reversed()
+                .thenComparing(entry -> entry.getValue().getRarity().ordinal())
+                .thenComparing(entry -> entry.getValue().getCards().size())
+                .thenComparing(Map.Entry::getKey)
+        ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new)));
     }
 }

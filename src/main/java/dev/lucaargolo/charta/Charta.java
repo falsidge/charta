@@ -1,5 +1,6 @@
 package dev.lucaargolo.charta;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import dev.lucaargolo.charta.block.ModBlocks;
 import dev.lucaargolo.charta.blockentity.CardTableBlockEntity;
@@ -19,6 +20,7 @@ import dev.lucaargolo.charta.resources.DeckResource;
 import dev.lucaargolo.charta.resources.SuitImageResource;
 import dev.lucaargolo.charta.sound.ModSounds;
 import dev.lucaargolo.charta.utils.PlayerOptionData;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
@@ -30,6 +32,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.levelgen.structure.pools.SinglePoolElement;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 import net.minecraftforge.common.MinecraftForge;
@@ -48,10 +52,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import org.slf4j.Logger;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(Charta.MOD_ID)
@@ -279,19 +280,19 @@ public class Charta {
         }
 
     }
-//    private static void addBuildingToPool(Registry<StructureTemplatePool> templatePoolRegistry, Registry<StructureProcessorList> processorListRegistry, ResourceLocation poolRL, String nbtPieceRL, int weight) {
-//        Holder<StructureProcessorList> emptyProcessorList = processorListRegistry.getHolderOrThrow(EMPTY_PROCESSOR_LIST_KEY);
-//        StructureTemplatePool pool = templatePoolRegistry.get(poolRL);
-//        if (pool == null) return;
-//
-//        SinglePoolElement piece = SinglePoolElement.legacy(nbtPieceRL, emptyProcessorList).apply(StructureTemplatePool.Projection.RIGID);
-//        for (int i = 0; i < weight; i++) {
-//            pool.templates.add(piece);
-//        }
-//
-//        List<Pair<StructurePoolElement, Integer>> listOfPieceEntries = new ArrayList<>(pool.rawTemplates);
-//        listOfPieceEntries.add(new Pair<>(piece, weight));
-//        pool.rawTemplates.addAll(listOfPieceEntries);
-//    }
+    private static void addBuildingToPool(Registry<StructureTemplatePool> templatePoolRegistry, Registry<StructureProcessorList> processorListRegistry, ResourceLocation poolRL, String nbtPieceRL, int weight) {
+        Holder<StructureProcessorList> emptyProcessorList = processorListRegistry.getHolderOrThrow(EMPTY_PROCESSOR_LIST_KEY);
+        StructureTemplatePool pool = templatePoolRegistry.get(poolRL);
+        if (pool == null) return;
+
+        SinglePoolElement piece = SinglePoolElement.legacy(nbtPieceRL, emptyProcessorList).apply(StructureTemplatePool.Projection.RIGID);
+        for (int i = 0; i < weight; i++) {
+            pool.templates.add(piece);
+        }
+
+        List<Pair<StructurePoolElement, Integer>> listOfPieceEntries = new ArrayList<>(pool.rawTemplates);
+        listOfPieceEntries.add(new Pair<>(piece, weight));
+        pool.rawTemplates = listOfPieceEntries;
+    }
 
 }
